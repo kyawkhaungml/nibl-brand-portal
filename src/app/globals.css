@@ -1,0 +1,77 @@
+@import '../styles/tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans:
+    var(--font-body-fallback), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading:
+    var(--font-heading-fallback), Georgia, "Times New Roman", serif;
+  --font-display:
+    var(--font-display-fallback), "Bowlby One", "Archivo Black", "Anton",
+    var(--font-heading);
+}
+
+@layer base {
+  html, body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  /* Signature NiBL card: white surface, 1px black border, hard offset shadow. */
+  .nibl-card {
+    @apply bg-card text-card-foreground border border-foreground rounded-lg shadow-flat;
+  }
+  /* Slightly recessed card for sub-sections inside another card. */
+  .nibl-card-soft {
+    @apply bg-muted border border-foreground rounded-lg;
+  }
+  /* Hero card on Overview — cream surface with accent border for emphasis. */
+  .nibl-hero {
+    @apply bg-muted border border-foreground rounded-lg shadow-flat;
+    border-color: hsl(var(--nibl-accent));
+  }
+  /* Generic horizontal progress bar. */
+  .nibl-progress {
+    height: 8px;
+    border-radius: 9999px;
+    background-color: hsl(var(--muted));
+    border: 1px solid hsl(var(--foreground));
+    overflow: hidden;
+  }
+  .nibl-progress-fill {
+    height: 100%;
+    background-color: hsl(var(--nibl-accent));
+    transition: width 400ms ease-out;
+  }
+  .nibl-progress-fill--success { background-color: hsl(var(--success)); }
+  .nibl-progress-fill--accent  { background-color: hsl(var(--nibl-accent)); }
+  .nibl-progress-fill--muted   { background-color: hsl(var(--foreground) / 0.35); }
+
+  .nibl-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.6) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-md;
+  }
+  .nibl-wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.1;
+  }
+}
