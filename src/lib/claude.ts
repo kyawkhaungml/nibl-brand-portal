@@ -66,6 +66,39 @@ export async function generateCampaignInsight(payload: unknown): Promise<string>
   return extractText(msg);
 }
 
+const CAMPAIGN_REPORT_SYSTEM_PROMPT = `You are a CPG campaign performance advisor for NiBL Brand Intelligence. Write a strategic campaign report. Structure as exactly 3 paragraphs with no headers or bullet points — flowing prose only.
+
+Paragraph 1: Performance summary. What went well. Cite specific numbers.
+
+Paragraph 2: Areas for improvement. Be specific about gaps vs benchmark. Do not sugarcoat.
+
+Paragraph 3: Three specific actionable recommendations for the next 30 days. Number them inline (1. 2. 3.) within the paragraph.
+
+Campaign data to analyze:
+- 847 samples distributed (85% of 1000 budget used)
+- 68% QR scan rate (category avg: 52%) — above
+- 4.7/5 avg rating (category avg: 4.5) — above
+- 34% buy-again (category avg: 38%) — BELOW benchmark
+- Top flavor: Yuzu (74% scan rate, 4.8 stars)
+- Weakest: Cold Brew Tonic (58% scan, 4.3 stars)
+- Best area: East Village (75% scan rate)
+- Worst area: Morningside Heights (53% scan rate)
+- Peak time: Dinner 7-9 PM (40% of all pairings)
+- 153 samples remaining, campaign ongoing
+
+Be confident and direct. Max 180 words total.`;
+
+export async function generateCampaignReport(): Promise<string> {
+  const client = getClient();
+  const msg = await client.messages.create({
+    model: MODEL,
+    max_tokens: 350,
+    system: CAMPAIGN_REPORT_SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: 'Generate the report now.' }],
+  });
+  return extractText(msg);
+}
+
 export async function generateIntelligenceChat(
   userMessage: string,
   history: ChatMessage[],

@@ -8,6 +8,9 @@ import { HeroCard } from '@/components/cards/hero-card';
 import { HighlightCard } from '@/components/cards/highlight-card';
 import { KPICard } from '@/components/cards/kpi-card';
 import { RangeToggle } from '@/components/range-toggle';
+import { DownloadReportButton } from '@/components/dashboard/download-report-button';
+import { SmartAlerts } from '@/components/dashboard/smart-alerts';
+import { useBrand } from '@/components/brand/brand-context';
 import type {
   BrandRanking,
   CampaignBenchmark,
@@ -60,9 +63,17 @@ export function OverviewClient({
   const topCombo = [...combos].sort((a, b) => b.scanRate - a.scanRate)[0];
   const topHood = [...hoods].sort((a, b) => b.scanRate - a.scanRate)[0];
   const bestTime = bestTimeWindow(tod);
+  const brand = useBrand();
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <DownloadReportButton
+          summary={summary}
+          benchmark={benchmark}
+          brandName={brand.name}
+        />
+      </div>
       <HeroCard
         customers={summary.totalPairings}
         scanRate={summary.scanRate}
@@ -124,6 +135,8 @@ export function OverviewClient({
       </div>
 
       <BenchmarkRows data={benchmark} />
+
+      <SmartAlerts />
 
       <BrandLeaderboard rows={leaderboard} />
     </div>

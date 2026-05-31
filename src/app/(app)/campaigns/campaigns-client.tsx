@@ -7,6 +7,8 @@ import { CampaignProgress } from '@/components/cards/campaign-progress';
 import { KPICard } from '@/components/cards/kpi-card';
 import { RankedList, type RankedRow } from '@/components/cards/ranked-list';
 import { VariantBreakdown } from '@/components/cards/variant-breakdown';
+import { RequestResupplyTrigger } from '@/components/campaigns/request-resupply-modal';
+import { AICampaignReportButton } from '@/components/campaigns/ai-campaign-report-button';
 import type {
   BrandCampaign,
   CampaignTimelinePoint,
@@ -64,6 +66,8 @@ export function CampaignsClient({
     <div className="space-y-6">
       <CampaignProgress campaign={campaign} samplesUsed={samplesUsed} />
 
+      <RequestResupplyTrigger />
+
       <div className="grid gap-4 sm:grid-cols-3">
         <KPICard
           label="Cost per engagement"
@@ -110,6 +114,8 @@ export function CampaignsClient({
         }}
         title="Campaign insight"
       />
+
+      <AICampaignReportButton />
 
       <div className="nibl-card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
