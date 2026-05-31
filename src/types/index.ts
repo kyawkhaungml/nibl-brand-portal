@@ -47,7 +47,14 @@ export type StatePerformance = {
   neighborhoods?: NeighborhoodPerformance[];   // NY only
 };
 
-export type CampaignStatus = 'active' | 'paused' | 'completed';
+export type CampaignStatus = 'active' | 'paused' | 'completed' | 'pending';
+
+export type UserCampaignExtras = {
+  targetNeighborhoods: string[];
+  promoCode: string;
+  notes: string;
+  samplesUsed?: number;     // user campaigns start at 0; not used by detail KPIs
+};
 
 export type BrandCampaign = {
   id: string;
@@ -60,6 +67,10 @@ export type BrandCampaign = {
   status: CampaignStatus;
   totalBudget: number;
   costPerSample: number;
+  /** Present on completed/past mock campaigns; live ones compute from summary. */
+  samplesUsed?: number;
+  /** Only on user-created (localStorage) campaigns. */
+  extras?: UserCampaignExtras;
 };
 
 export type DateRange = '7D' | '30D' | '90D';

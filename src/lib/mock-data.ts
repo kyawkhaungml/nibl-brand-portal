@@ -42,7 +42,7 @@ const brand: BrandPartner = {
 };
 
 const campaign: BrandCampaign = {
-  id: '00000000-0000-0000-0000-000000summer',
+  id: 'summer-2026',
   brandId: brand.id,
   name: 'Summer Pairing Campaign',
   drinkName: 'Kace Sparkling Yuzu',
@@ -53,6 +53,36 @@ const campaign: BrandCampaign = {
   totalBudget: 1000,
   costPerSample: 2.5,
 };
+
+const campaigns: BrandCampaign[] = [
+  campaign,
+  {
+    id: 'spring-launch-2026',
+    brandId: brand.id,
+    name: 'Spring Launch',
+    drinkName: 'Hibiscus Lime',
+    drinkVariants: ['Hibiscus Lime', 'Yuzu'],
+    startDate: daysAgo(180),
+    endDate: daysAgo(120),
+    status: 'completed',
+    totalBudget: 600,
+    costPerSample: 2.5,
+    samplesUsed: 600,
+  },
+  {
+    id: 'holiday-2025',
+    brandId: brand.id,
+    name: 'Holiday Sampler',
+    drinkName: 'Yuzu Ginger',
+    drinkVariants: ['Yuzu Ginger', 'Cold Brew Tonic', 'Yuzu Mint'],
+    startDate: daysAgo(280),
+    endDate: daysAgo(220),
+    status: 'completed',
+    totalBudget: 1500,
+    costPerSample: 2.25,
+    samplesUsed: 1200,
+  },
+];
 
 const dailyPairings: DailyPairingPoint[] = Array.from({ length: 90 }, (_, i) => {
   const dayIndex = 89 - i;
@@ -523,6 +553,7 @@ const codeAttribution: CodeAttribution = {
 export const kaceMockData = {
   brand,
   campaign,
+  campaigns,
   summary,
   dailyPairings,
   drinkVariants,
