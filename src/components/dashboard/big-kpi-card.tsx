@@ -12,12 +12,16 @@ export function BigKPICard({
   className?: string;
 }) {
   return (
-    <div className={cn('nibl-card flex flex-col justify-between p-7', className)}>
-      <div className="text-[12px] text-muted-foreground">{label}</div>
-      <div className="font-heading text-display-3xl leading-none text-foreground">
-        {value}
+    <div className={cn('nibl-card flex flex-col p-8', className)}>
+      <div className="text-[18px] text-muted-foreground">{label}</div>
+      <div className="flex flex-1 items-center justify-center py-4">
+        <div className="font-heading text-display-3xl leading-none text-foreground text-center">
+          {value}
+        </div>
       </div>
-      {sub ? <div className="text-[12px] text-muted-foreground">{sub}</div> : null}
+      {sub ? (
+        <div className="text-[12px] text-muted-foreground">{sub}</div>
+      ) : null}
     </div>
   );
 }

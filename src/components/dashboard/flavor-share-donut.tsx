@@ -21,7 +21,9 @@ export function FlavorShareDonut({
 
   return (
     <div className="nibl-card flex flex-col p-6">
-      <div className="text-sm font-medium text-foreground">Flavor share</div>
+      <div className="text-[18px] font-medium text-foreground">
+        Flavor Distribution
+      </div>
       <p className="mt-0.5 text-xs text-muted-foreground">
         Share of customer pairings
       </p>
