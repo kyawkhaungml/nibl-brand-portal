@@ -4,9 +4,9 @@
   "private": true,
   "description": "NiBL Brand Partner Portal — pairing insights, taste analytics, campaign tracker for CPG beverage brands.",
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3004",
     "build": "next build",
-    "start": "next start -p 3000",
+    "start": "next start -p 3004",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },

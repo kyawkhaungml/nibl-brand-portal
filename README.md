@@ -11,7 +11,7 @@ git clone <this repo>
 cd nibl-brand-portal
 npm install
 npm run dev
-# → http://localhost:3000
+# → http://localhost:3004
 ```
 
 That's it. The app boots into mock-data mode by default (Kace Beverages demo) so you can click through every screen without any environment configuration.
