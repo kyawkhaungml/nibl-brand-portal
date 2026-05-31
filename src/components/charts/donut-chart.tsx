@@ -13,10 +13,17 @@ type Slice = { name: string; value: number };
 export function DonutChart({
   data,
   height = 320,
+  colors,
+  innerRadius = 80,
+  outerRadius = 130,
 }: {
   data: Slice[];
   height?: number;
+  colors?: string[];
+  innerRadius?: number;
+  outerRadius?: number;
 }) {
+  const fills = colors ?? palette;
   if (!data.length) {
     return (
       <div
@@ -40,14 +47,14 @@ export function DonutChart({
           data={data}
           dataKey="value"
           nameKey="name"
-          innerRadius={80}
-          outerRadius={130}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
           paddingAngle={1.5}
           stroke="#000"
           strokeWidth={1}
         >
           {data.map((_, i) => (
-            <Cell key={i} fill={palette[i % palette.length]} />
+            <Cell key={i} fill={fills[i % fills.length]} />
           ))}
         </Pie>
       </PieChart>

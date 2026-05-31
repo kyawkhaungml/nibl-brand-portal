@@ -10,12 +10,15 @@ import { KPICard } from '@/components/cards/kpi-card';
 import { RangeToggle } from '@/components/range-toggle';
 import { DownloadReportButton } from '@/components/dashboard/download-report-button';
 import { SmartAlerts } from '@/components/dashboard/smart-alerts';
+import { TopKpiRow } from '@/components/dashboard/top-kpi-row';
 import { useBrand } from '@/components/brand/brand-context';
 import type {
   BrandRanking,
   CampaignBenchmark,
+  CodeAttribution,
   DailyPairingPoint,
   DateRange,
+  DrinkVariantPerformance,
   FoodCombo,
   NeighborhoodPerformance,
   PairingSummary,
@@ -50,6 +53,9 @@ export function OverviewClient({
   tod,
   benchmark,
   leaderboard,
+  variants,
+  attribution,
+  avgOrderValue,
 }: {
   range: DateRange;
   summary: PairingSummary;
@@ -59,6 +65,9 @@ export function OverviewClient({
   tod: TimeOfDayBucket[];
   benchmark: CampaignBenchmark[];
   leaderboard: BrandRanking[];
+  variants: DrinkVariantPerformance[];
+  attribution: CodeAttribution;
+  avgOrderValue: number;
 }) {
   const topCombo = [...combos].sort((a, b) => b.scanRate - a.scanRate)[0];
   const topHood = [...hoods].sort((a, b) => b.scanRate - a.scanRate)[0];
@@ -74,6 +83,11 @@ export function OverviewClient({
           brandName={brand.name}
         />
       </div>
+      <TopKpiRow
+        variants={variants}
+        attribution={attribution}
+        avgOrderValue={avgOrderValue}
+      />
       <HeroCard
         customers={summary.totalPairings}
         scanRate={summary.scanRate}

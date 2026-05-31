@@ -4,6 +4,7 @@ import { env } from '@/lib/env';
 import { kaceMockData } from '@/lib/mock-data';
 import type {
   BrandRanking,
+  CodeAttribution,
   DailyPairingPoint,
   DateRange,
   DrinkVariantPerformance,
@@ -66,5 +67,13 @@ export async function getBrandLeaderboard(_brandId: string): Promise<BrandRankin
   // TODO(v2): aggregate product_pairings + drink_reviews + qr_scans across all
   // partner brands; rank by pairings (or a composite score). Mark the current
   // brand's row with isYou = true.
+  throw new Error('Real data wiring not implemented.');
+}
+
+export async function getCodeAttribution(_brandId: string): Promise<CodeAttribution> {
+  if (env.useMockData) return kaceMockData.codeAttribution;
+  // TODO(v2): join orders.promo_code = brand_partners.promo_code, count distinct
+  // user_ids (= redemptions) and sum order totals (= revenueCents); divide by
+  // total samples distributed for conversionRate.
   throw new Error('Real data wiring not implemented.');
 }

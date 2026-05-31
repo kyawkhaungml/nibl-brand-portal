@@ -7,6 +7,14 @@ export type BrandPartner = {
   createdAt: string;
 };
 
+export type CodeAttribution = {
+  promoCode: string;
+  redemptions: number;     // unique customers who used the code
+  conversionRate: number;  // percent, 0-100 = redemptions / samples
+  totalOrders: number;     // includes repeat purchases
+  revenueCents: number;
+};
+
 export type CampaignStatus = 'active' | 'paused' | 'completed';
 
 export type BrandCampaign = {

@@ -4,6 +4,7 @@ import type {
   BrandRanking,
   CampaignBenchmark,
   CampaignTimelinePoint,
+  CodeAttribution,
   CustomerSegment,
   DailyPairingPoint,
   Demographics,
@@ -178,6 +179,17 @@ const campaignTimeline: CampaignTimelinePoint[] = dailyPairings.map((d) => ({
   scanRate: d.scanRate,
 }));
 
+// Brand-issued promo code redemption attribution.
+// 218 sampled customers redeemed → 218 / 847 = 25.7% conversion.
+// Their 41% repeat behavior carries forward to ~376 total orders @ $28.40 AOV.
+const codeAttribution: CodeAttribution = {
+  promoCode: 'KACE10',
+  redemptions: 218,
+  conversionRate: 25.7,
+  totalOrders: 376,
+  revenueCents: 1067840, // $10,678.40
+};
+
 export const kaceMockData = {
   brand,
   campaign,
@@ -194,4 +206,5 @@ export const kaceMockData = {
   benchmark,
   campaignTimeline,
   brandLeaderboard,
+  codeAttribution,
 };
