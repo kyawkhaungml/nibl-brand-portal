@@ -28,12 +28,12 @@ export function MiniStateMap({
 
   return (
     <div>
-      <div className="mx-auto max-w-[320px]">
+      <div className="mx-auto max-w-[420px]">
         <ComposableMap
           projection="geoAlbersUsa"
-          projectionConfig={{ scale: 580 }}
-          width={320}
-          height={180}
+          projectionConfig={{ scale: 500 }}
+          width={400}
+          height={240}
           style={{ width: '100%', height: 'auto' }}
         >
           <Geographies geography="/maps/us-states-10m.json">
