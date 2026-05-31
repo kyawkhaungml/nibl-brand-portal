@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  Brain,
   Home,
   LogOut,
   Settings,
@@ -16,6 +17,7 @@ const nav = [
   { href: '/dashboard', label: 'Overview', icon: Home, matches: ['/dashboard', '/pairing-insights'] },
   { href: '/campaigns', label: 'My Campaign', icon: Target, matches: ['/campaigns'] },
   { href: '/taste-analytics', label: 'Audience', icon: Users, matches: ['/taste-analytics'] },
+  { href: '/intelligence', label: 'Intelligence', icon: Brain, matches: ['/intelligence'] },
   { href: '/settings', label: 'Settings', icon: Settings, matches: ['/settings'] },
 ];
 

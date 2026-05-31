@@ -2,6 +2,11 @@ import 'server-only';
 
 import Anthropic from '@anthropic-ai/sdk';
 import { serverEnv } from './env';
+import { CHAT_SYSTEM_PROMPT, PREDICT_SYSTEM_PROMPT } from './intelligence/prompts';
+import type {
+  ChatMessage,
+  ProductPrediction,
+} from './intelligence/types';
 
 const MODEL = 'claude-sonnet-4-6';
 
@@ -59,6 +64,62 @@ export async function generateCampaignInsight(payload: unknown): Promise<string>
     ],
   });
   return extractText(msg);
+}
+
+export async function generateIntelligenceChat(
+  userMessage: string,
+  history: ChatMessage[],
+): Promise<string> {
+  const client = getClient();
+  const trimmed = history.slice(-6).map((m) => ({
+    role: m.role,
+    content: m.content,
+  }));
+  const msg = await client.messages.create({
+    model: MODEL,
+    max_tokens: 600,
+    system: CHAT_SYSTEM_PROMPT,
+    messages: [...trimmed, { role: 'user', content: userMessage }],
+  });
+  return extractText(msg);
+}
+
+export async function generateProductPrediction(
+  flavorDescription: string,
+  targetFoods: string[],
+): Promise<ProductPrediction> {
+  const client = getClient();
+  const userContent = `New flavor description:\n${flavorDescription}\n\nTarget food pairings the brand is considering:\n${targetFoods.length ? targetFoods.join(', ') : '(none specified — recommend the best one)'}\n\nReturn the JSON now.`;
+  const msg = await client.messages.create({
+    model: MODEL,
+    max_tokens: 400,
+    system: PREDICT_SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: userContent }],
+  });
+  const raw = extractText(msg);
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start < 0 || end < 0) {
+    throw new Error('Predictor returned no JSON.');
+  }
+  const parsed = JSON.parse(raw.slice(start, end + 1)) as ProductPrediction;
+  // Clamp to ranges in case the model returned out-of-bounds values.
+  return {
+    predictedScanRate: clamp(parsed.predictedScanRate, 0, 100),
+    predictedRating: clamp(parsed.predictedRating, 0, 5),
+    predictedBuyAgain: clamp(parsed.predictedBuyAgain, 0, 100),
+    icpFitScore: clamp(parsed.icpFitScore, 0, 100),
+    analysis: String(parsed.analysis ?? '').trim(),
+    bestFoodPairing: String(parsed.bestFoodPairing ?? '').trim(),
+    bestFoodAffinityScore: clamp(parsed.bestFoodAffinityScore, 0, 1),
+    riskFlag: parsed.riskFlag ? String(parsed.riskFlag).trim() : null,
+  };
+}
+
+function clamp(n: unknown, lo: number, hi: number): number {
+  const x = typeof n === 'number' ? n : Number(n);
+  if (!Number.isFinite(x)) return lo;
+  return Math.max(lo, Math.min(hi, x));
 }
 
 export type CampaignSuggestion = { title: string; body: string };
