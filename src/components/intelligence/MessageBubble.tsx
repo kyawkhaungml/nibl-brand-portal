@@ -1,7 +1,13 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
-import type { ChatMessage } from '@/lib/intelligence/types';
+import { ComparisonBars } from './ComparisonBars';
+import { MiniStateMap } from './MiniStateMap';
+import { InsightCallout } from './InsightCallout';
+import type {
+  ChatMessage,
+  ChatReplyStructured,
+} from '@/lib/intelligence/types';
 
 function fmtTime(iso: string): string {
   try {
@@ -12,8 +18,8 @@ function fmtTime(iso: string): string {
   }
 }
 
-// Tiny markdown renderer: **bold**, bullets, and `→ Recommended action:` line.
-function renderAssistant(content: string): React.ReactNode {
+// Plain-text markdown fallback: **bold**, bullets, and "→ Recommended action:" line.
+function renderAssistantText(content: string): React.ReactNode {
   const lines = content.split('\n');
   const ACTION_RE = /^→\s*Recommended action:\s*(.+)$/i;
   const out: React.ReactNode[] = [];
@@ -37,15 +43,7 @@ function renderAssistant(content: string): React.ReactNode {
     const action = ACTION_RE.exec(line);
     if (action) {
       flushBullets(idx);
-      out.push(
-        <div
-          key={`act-${idx}`}
-          className="mt-3 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-[12px] text-foreground"
-        >
-          <span className="text-accent">→ Recommended action:</span>{' '}
-          {action[1]}
-        </div>,
-      );
+      out.push(<ActionLine key={`act-${idx}`} text={action[1]} />);
       return;
     }
     const bullet = line.match(/^[-•]\s+(.*)$/);
@@ -87,8 +85,70 @@ function renderInline(text: string): React.ReactNode {
   return parts;
 }
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+      {children}
+    </div>
+  );
+}
+
+function ActionLine({ text }: { text: string }) {
+  return (
+    <div className="mt-3 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-[12px] text-foreground">
+      <span className="text-accent">→ Recommended action:</span> {text}
+    </div>
+  );
+}
+
+function renderStructured(r: ChatReplyStructured): React.ReactNode {
+  return (
+    <div className="space-y-3">
+      <p className="text-[13px] leading-relaxed">{r.intro}</p>
+
+      {r.comparisons && r.comparisons.length > 0 ? (
+        <div className="space-y-2">
+          <SectionLabel>Comparison</SectionLabel>
+          <ComparisonBars items={r.comparisons} />
+        </div>
+      ) : null}
+
+      {r.states && r.states.length > 0 ? (
+        <div className="space-y-2">
+          <SectionLabel>
+            {r.statesCaption ?? 'Where your ICP shows up'}
+          </SectionLabel>
+          <MiniStateMap states={r.states} caption={r.statesCaption} />
+        </div>
+      ) : null}
+
+      {r.whatsWorking && r.whatsWorking.length > 0 ? (
+        <InsightCallout
+          tone="positive"
+          label="What's working"
+          items={r.whatsWorking}
+        />
+      ) : null}
+
+      {r.watchOuts && r.watchOuts.length > 0 ? (
+        <InsightCallout
+          tone="caution"
+          label="Watch-outs"
+          items={r.watchOuts}
+        />
+      ) : null}
+
+      <ActionLine text={r.recommendation} />
+    </div>
+  );
+}
+
 export function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user';
+  const hasRich =
+    !!message.structured &&
+    typeof message.structured.intro === 'string' &&
+    typeof message.structured.recommendation === 'string';
   return (
     <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={isUser ? 'max-w-[80%]' : 'max-w-[88%]'}>
@@ -105,7 +165,13 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
               : 'bg-card text-foreground border border-foreground shadow-flat-sm rounded-[16px_16px_16px_4px]',
           ].join(' ')}
         >
-          {isUser ? <p>{message.content}</p> : renderAssistant(message.content)}
+          {isUser ? (
+            <p>{message.content}</p>
+          ) : hasRich ? (
+            renderStructured(message.structured!)
+          ) : (
+            renderAssistantText(message.content)
+          )}
         </div>
         <div
           className={`mt-1 text-[10px] text-muted-foreground ${isUser ? 'text-right' : 'text-left'}`}

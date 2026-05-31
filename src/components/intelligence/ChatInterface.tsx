@@ -154,6 +154,17 @@ export function ChatInterface() {
           reply: string;
           structured?: ChatReplyStructured;
         };
+        if (process.env.NODE_ENV !== 'production') {
+          // Diagnostic: confirm the structured field reached the browser.
+          // Open DevTools console after sending a message.
+          // eslint-disable-next-line no-console
+          console.debug('[chat] received', {
+            hasStructured: !!data.structured,
+            structuredKeys: data.structured
+              ? Object.keys(data.structured)
+              : null,
+          });
+        }
         const reply: ChatMessage = {
           id: makeId(),
           role: 'assistant',
