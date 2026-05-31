@@ -4,7 +4,7 @@ import { getDrinkVariants } from '@/lib/api/pairing-insights';
 import {
   getActiveCampaign,
   getCampaignNeighborhoods,
-  getCampaignTimeline,
+  getGeoBreakdown,
   getSamplesUsed,
 } from '@/lib/api/campaigns';
 import { CampaignsClient } from './campaigns-client';
@@ -21,19 +21,19 @@ export default async function CampaignsPage() {
     );
   }
 
-  const [timeline, hoods, samplesUsed, variants] = await Promise.all([
-    getCampaignTimeline(campaign.id),
+  const [hoods, samplesUsed, variants, geo] = await Promise.all([
     getCampaignNeighborhoods(campaign.id),
     getSamplesUsed(campaign.id),
     getDrinkVariants(brandId),
+    getGeoBreakdown(brandId),
   ]);
 
   return (
     <CampaignsClient
       campaign={campaign}
-      timeline={timeline}
       hoods={hoods}
       variants={variants}
+      geo={geo}
       samplesUsed={samplesUsed}
       scanRate={kaceMockData.summary.scanRate}
       topCombos={kaceMockData.foodCombos.slice(0, 5)}

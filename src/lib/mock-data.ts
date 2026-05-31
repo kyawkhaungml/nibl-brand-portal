@@ -13,6 +13,7 @@ import type {
   NeighborhoodPerformance,
   PairingSummary,
   RepeatBehavior,
+  StatePerformance,
   TasteDimension,
   TimeOfDayBucket,
 } from '@/types';
@@ -179,6 +180,335 @@ const campaignTimeline: CampaignTimelinePoint[] = dailyPairings.map((d) => ({
   scanRate: d.scanRate,
 }));
 
+// State-level performance for the choropleth + drilldown on /campaigns.
+// NY is the live market; everything else is a predicted-fit opportunity.
+const geoBreakdown: StatePerformance[] = [
+  {
+    code: 'NY',
+    name: 'New York',
+    status: 'active',
+    deliveries: 847,
+    predictedScanRate: 68,
+    icpMatch: 100,
+    topCity: 'New York City',
+    icpSnapshot: {
+      citrusPreference: 81,
+      carbonationPreference: 76,
+      spiceTolerance: 72,
+      topCuisines: ['Asian fusion', 'Salads & bowls', 'Japanese'],
+      peakTime: 'Dinner 7-9 PM',
+      avgOrderValue: 28.4,
+      recommendation:
+        'Your home market. East Village is your strongest neighborhood (75% scan rate); LES is your second largest.',
+    },
+    neighborhoods: neighborhoods,
+  },
+  {
+    code: 'CA',
+    name: 'California',
+    status: 'opportunity',
+    predictedScanRate: 72,
+    icpMatch: 89,
+    topCity: 'Los Angeles',
+    icpSnapshot: {
+      citrusPreference: 86,
+      carbonationPreference: 80,
+      spiceTolerance: 75,
+      topCuisines: ['Sushi', 'Mexican', 'Healthy bowls'],
+      peakTime: 'Dinner 6-9 PM',
+      avgOrderValue: 31.2,
+      recommendation:
+        'Highest predicted ICP match outside NY — LA + SF index 89% on your top-buyer profile.',
+    },
+    cities: [
+      { name: 'Los Angeles', estReach: 12400, predictedScanRate: 72, icpMatch: 89 },
+      { name: 'San Francisco', estReach: 8200, predictedScanRate: 74, icpMatch: 92 },
+      { name: 'San Diego', estReach: 5100, predictedScanRate: 68, icpMatch: 84 },
+    ],
+  },
+  {
+    code: 'MA',
+    name: 'Massachusetts',
+    status: 'opportunity',
+    predictedScanRate: 70,
+    icpMatch: 85,
+    topCity: 'Boston',
+    icpSnapshot: {
+      citrusPreference: 79,
+      carbonationPreference: 78,
+      spiceTolerance: 68,
+      topCuisines: ['Seafood', 'Asian fusion', 'Salads & bowls'],
+      peakTime: 'Dinner 7-10 PM',
+      avgOrderValue: 29.8,
+      recommendation:
+        'Boston-Cambridge corridor pairs your top variants with seafood — 85% predicted ICP match.',
+    },
+    cities: [
+      { name: 'Boston', estReach: 7800, predictedScanRate: 71, icpMatch: 86 },
+      { name: 'Cambridge', estReach: 4200, predictedScanRate: 73, icpMatch: 88 },
+    ],
+  },
+  {
+    code: 'WA',
+    name: 'Washington',
+    status: 'opportunity',
+    predictedScanRate: 69,
+    icpMatch: 82,
+    topCity: 'Seattle',
+    icpSnapshot: {
+      citrusPreference: 77,
+      carbonationPreference: 82,
+      spiceTolerance: 65,
+      topCuisines: ['Asian fusion', 'Coffee bars', 'Sushi'],
+      peakTime: 'Afternoon 2-5 PM',
+      avgOrderValue: 27.6,
+      recommendation:
+        'Seattle over-indexes on carbonation preference (82%) — Yuzu Mint should lead the launch.',
+    },
+    cities: [
+      { name: 'Seattle', estReach: 9100, predictedScanRate: 69, icpMatch: 82 },
+      { name: 'Bellevue', estReach: 2300, predictedScanRate: 67, icpMatch: 80 },
+    ],
+  },
+  {
+    code: 'IL',
+    name: 'Illinois',
+    status: 'opportunity',
+    predictedScanRate: 65,
+    icpMatch: 80,
+    topCity: 'Chicago',
+    icpSnapshot: {
+      citrusPreference: 74,
+      carbonationPreference: 72,
+      spiceTolerance: 70,
+      topCuisines: ['Asian fusion', 'Italian', 'Salads & bowls'],
+      peakTime: 'Dinner 7-9 PM',
+      avgOrderValue: 26.8,
+      recommendation:
+        'Chicago Loop + West Loop are your strongest fit; Hibiscus Lime expected to over-index here.',
+    },
+    cities: [
+      { name: 'Chicago', estReach: 11200, predictedScanRate: 65, icpMatch: 80 },
+      { name: 'Evanston', estReach: 1800, predictedScanRate: 68, icpMatch: 83 },
+    ],
+  },
+  {
+    code: 'CO',
+    name: 'Colorado',
+    status: 'opportunity',
+    predictedScanRate: 67,
+    icpMatch: 79,
+    topCity: 'Denver',
+    icpSnapshot: {
+      citrusPreference: 76,
+      carbonationPreference: 79,
+      spiceTolerance: 64,
+      topCuisines: ['Healthy bowls', 'Asian fusion', 'Mexican'],
+      peakTime: 'Lunch 12-2 PM',
+      avgOrderValue: 26.4,
+      recommendation:
+        'Denver + Boulder skew health-conscious; lunch slots are 18% higher engagement.',
+    },
+    cities: [
+      { name: 'Denver', estReach: 6400, predictedScanRate: 67, icpMatch: 79 },
+      { name: 'Boulder', estReach: 1900, predictedScanRate: 70, icpMatch: 84 },
+    ],
+  },
+  {
+    code: 'DC',
+    name: 'District of Columbia',
+    status: 'opportunity',
+    predictedScanRate: 66,
+    icpMatch: 78,
+    topCity: 'Washington',
+    icpSnapshot: {
+      citrusPreference: 75,
+      carbonationPreference: 74,
+      spiceTolerance: 69,
+      topCuisines: ['Asian fusion', 'Mediterranean', 'Salads & bowls'],
+      peakTime: 'Lunch 12-2 PM',
+      avgOrderValue: 28.1,
+      recommendation:
+        'Government corridor lunch crowd — concentrate samples in NW and Capitol Hill.',
+    },
+    cities: [
+      { name: 'Washington', estReach: 5400, predictedScanRate: 66, icpMatch: 78 },
+    ],
+  },
+  {
+    code: 'OR',
+    name: 'Oregon',
+    status: 'opportunity',
+    predictedScanRate: 64,
+    icpMatch: 76,
+    topCity: 'Portland',
+    icpSnapshot: {
+      citrusPreference: 73,
+      carbonationPreference: 76,
+      spiceTolerance: 62,
+      topCuisines: ['Coffee bars', 'Asian fusion', 'Vegan'],
+      peakTime: 'Afternoon 2-5 PM',
+      avgOrderValue: 24.9,
+      recommendation:
+        'Portland leans vegan + carbonated; consider a Hibiscus Lime + non-alc cocktail angle.',
+    },
+    cities: [
+      { name: 'Portland', estReach: 4900, predictedScanRate: 64, icpMatch: 76 },
+    ],
+  },
+  {
+    code: 'TX',
+    name: 'Texas',
+    status: 'opportunity',
+    predictedScanRate: 58,
+    icpMatch: 65,
+    topCity: 'Austin',
+    icpSnapshot: {
+      citrusPreference: 71,
+      carbonationPreference: 68,
+      spiceTolerance: 84,
+      topCuisines: ['Tex-Mex', 'BBQ', 'Asian fusion'],
+      peakTime: 'Dinner 7-10 PM',
+      avgOrderValue: 25.3,
+      recommendation:
+        'Austin only — your Yuzu Ginger over-indexes on spicy pairings (84% spice tolerance).',
+    },
+    cities: [
+      { name: 'Austin', estReach: 5200, predictedScanRate: 65, icpMatch: 78 },
+      { name: 'Houston', estReach: 3800, predictedScanRate: 54, icpMatch: 58 },
+      { name: 'Dallas', estReach: 3400, predictedScanRate: 56, icpMatch: 60 },
+    ],
+  },
+  {
+    code: 'GA',
+    name: 'Georgia',
+    status: 'opportunity',
+    predictedScanRate: 56,
+    icpMatch: 62,
+    topCity: 'Atlanta',
+    icpSnapshot: {
+      citrusPreference: 68,
+      carbonationPreference: 64,
+      spiceTolerance: 72,
+      topCuisines: ['Southern', 'Soul food', 'Tex-Mex'],
+      peakTime: 'Dinner 7-9 PM',
+      avgOrderValue: 24.6,
+      recommendation:
+        'Atlanta only — 62% match. Concentrate samples in Buckhead and Midtown.',
+    },
+    cities: [
+      { name: 'Atlanta', estReach: 4100, predictedScanRate: 56, icpMatch: 62 },
+    ],
+  },
+  {
+    code: 'MI',
+    name: 'Michigan',
+    status: 'opportunity',
+    predictedScanRate: 54,
+    icpMatch: 58,
+    topCity: 'Ann Arbor',
+    icpSnapshot: {
+      citrusPreference: 66,
+      carbonationPreference: 62,
+      spiceTolerance: 60,
+      topCuisines: ['American', 'Asian fusion', 'Italian'],
+      peakTime: 'Dinner 6-9 PM',
+      avgOrderValue: 22.8,
+      recommendation:
+        'Ann Arbor over-indexes (university crowd); Detroit is a soft launch.',
+    },
+    cities: [
+      { name: 'Ann Arbor', estReach: 1700, predictedScanRate: 62, icpMatch: 72 },
+      { name: 'Detroit', estReach: 2400, predictedScanRate: 50, icpMatch: 52 },
+    ],
+  },
+  {
+    code: 'PA',
+    name: 'Pennsylvania',
+    status: 'opportunity',
+    predictedScanRate: 53,
+    icpMatch: 55,
+    topCity: 'Philadelphia',
+    icpSnapshot: {
+      citrusPreference: 64,
+      carbonationPreference: 60,
+      spiceTolerance: 58,
+      topCuisines: ['American', 'Italian', 'Asian fusion'],
+      peakTime: 'Dinner 7-9 PM',
+      avgOrderValue: 22.1,
+      recommendation:
+        'Philly Center City is the strongest pocket; broad PA rollout would dilute the campaign.',
+    },
+    cities: [
+      { name: 'Philadelphia', estReach: 3200, predictedScanRate: 53, icpMatch: 55 },
+    ],
+  },
+  {
+    code: 'FL',
+    name: 'Florida',
+    status: 'opportunity',
+    predictedScanRate: 51,
+    icpMatch: 52,
+    topCity: 'Miami',
+    icpSnapshot: {
+      citrusPreference: 79,
+      carbonationPreference: 70,
+      spiceTolerance: 64,
+      topCuisines: ['Cuban', 'Seafood', 'Latin fusion'],
+      peakTime: 'Late night 10 PM-1 AM',
+      avgOrderValue: 26.7,
+      recommendation:
+        'Miami over-indexes on citrus (79%) but the FL late-night profile is a poor fit for Kace.',
+    },
+    cities: [
+      { name: 'Miami', estReach: 4600, predictedScanRate: 60, icpMatch: 68 },
+      { name: 'Tampa', estReach: 1900, predictedScanRate: 46, icpMatch: 45 },
+    ],
+  },
+  {
+    code: 'OH',
+    name: 'Ohio',
+    status: 'low-match',
+    predictedScanRate: 38,
+    icpMatch: 42,
+    topCity: 'Columbus',
+    icpSnapshot: {
+      citrusPreference: 52,
+      carbonationPreference: 56,
+      spiceTolerance: 50,
+      topCuisines: ['American', 'Italian', 'BBQ'],
+      peakTime: 'Dinner 6-8 PM',
+      avgOrderValue: 19.4,
+      recommendation:
+        'Not a recommended early market — taste profile diverges from Kace\'s top buyers.',
+    },
+    cities: [
+      { name: 'Columbus', estReach: 1400, predictedScanRate: 38, icpMatch: 42 },
+    ],
+  },
+  {
+    code: 'NC',
+    name: 'North Carolina',
+    status: 'low-match',
+    predictedScanRate: 36,
+    icpMatch: 41,
+    topCity: 'Raleigh',
+    icpSnapshot: {
+      citrusPreference: 54,
+      carbonationPreference: 52,
+      spiceTolerance: 56,
+      topCuisines: ['Southern', 'BBQ', 'American'],
+      peakTime: 'Dinner 6-8 PM',
+      avgOrderValue: 19.8,
+      recommendation:
+        'Skip for now — pair-with-spice signal exists but the broader ICP gap is too wide.',
+    },
+    cities: [
+      { name: 'Raleigh', estReach: 1100, predictedScanRate: 36, icpMatch: 41 },
+    ],
+  },
+];
+
 // Brand-issued promo code redemption attribution.
 // 218 sampled customers redeemed → 218 / 847 = 25.7% conversion.
 // Their 41% repeat behavior carries forward to ~376 total orders @ $28.40 AOV.
@@ -207,4 +537,5 @@ export const kaceMockData = {
   campaignTimeline,
   brandLeaderboard,
   codeAttribution,
+  geoBreakdown,
 };

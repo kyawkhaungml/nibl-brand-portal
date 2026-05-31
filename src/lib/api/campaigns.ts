@@ -7,6 +7,7 @@ import type {
   CampaignBenchmark,
   CampaignTimelinePoint,
   NeighborhoodPerformance,
+  StatePerformance,
 } from '@/types';
 
 export async function getActiveCampaign(_brandId: string): Promise<BrandCampaign | null> {
@@ -35,5 +36,12 @@ export async function getCampaignNeighborhoods(
 
 export async function getSamplesUsed(_campaignId: string): Promise<number> {
   if (env.useMockData) return kaceMockData.summary.totalPairings;
+  throw new Error('Real data wiring not implemented.');
+}
+
+export async function getGeoBreakdown(_brandId: string): Promise<StatePerformance[]> {
+  if (env.useMockData) return kaceMockData.geoBreakdown;
+  // TODO(v2): query clustering-model predicted ICP keyed by state +
+  // join product_pairings (currently NY only) for the active row.
   throw new Error('Real data wiring not implemented.');
 }

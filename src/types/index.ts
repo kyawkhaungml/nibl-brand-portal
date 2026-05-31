@@ -15,6 +15,38 @@ export type CodeAttribution = {
   revenueCents: number;
 };
 
+export type StateStatus = 'active' | 'opportunity' | 'low-match';
+
+export type CityPerformance = {
+  name: string;
+  estReach: number;          // estimated NiBL-eligible customers in the city
+  predictedScanRate: number;
+  icpMatch: number;
+};
+
+export type StateIcpSnapshot = {
+  citrusPreference: number;
+  carbonationPreference: number;
+  spiceTolerance: number;
+  topCuisines: string[];     // top 3
+  peakTime: string;
+  avgOrderValue: number;
+  recommendation: string;    // one-line "why this state" callout
+};
+
+export type StatePerformance = {
+  code: string;              // 2-letter, e.g. "NY"
+  name: string;
+  status: StateStatus;
+  deliveries?: number;       // only present when status === 'active'
+  predictedScanRate: number;
+  icpMatch: number;          // 0-100
+  topCity: string;
+  icpSnapshot: StateIcpSnapshot;
+  cities?: CityPerformance[];                  // non-NY states
+  neighborhoods?: NeighborhoodPerformance[];   // NY only
+};
+
 export type CampaignStatus = 'active' | 'paused' | 'completed';
 
 export type BrandCampaign = {
