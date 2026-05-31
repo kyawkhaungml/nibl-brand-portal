@@ -12,45 +12,93 @@ import { ChevronDown, ChevronUp, Send, Sparkles } from 'lucide-react';
 import { MessageBubble, ThinkingBubble } from './MessageBubble';
 import { QuickPrompts } from './QuickPrompts';
 import { DataContextCard } from './DataContextCard';
-import type { ChatMessage } from '@/lib/intelligence/types';
+import type {
+  ChatMessage,
+  ChatReplyStructured,
+} from '@/lib/intelligence/types';
 import { cn } from '@/lib/utils';
 
 const MAX_CHARS = 500;
 
-const STARTERS: { id: string; title: string; user: string; assistant: string }[] = [
+type Starter = {
+  id: string;
+  title: string;
+  user: string;
+  assistant: ChatReplyStructured;
+};
+
+const STARTERS: Starter[] = [
   {
     id: 'starter-launch',
     title: 'New flavor launch',
     user: "We're launching cucumber mint sparkling water next month. Would our customers like it?",
-    assistant: `Probably **moderate fit, not a hero launch**. Your ICP indexes high on **citrus (81%)** and **carbonation (76%)**, which the sparkling base captures well — but **mint/herbal notes** don't appear in any of your top taste signals, and your top variant (**Yuzu at 312 pairings, 4.8★**) is citrus-forward, not herbal.
-
-- Best-case audience: the **22% health-conscious segment** + the **18% sweet-tooth** crowd looking for a lighter option
-- Best food pairing: **Salads** (Yuzu Mint already scores 0.88 there)
-- Expect performance in the **62–70% scan rate** range, below your Yuzu hero
-
-→ Recommended action: pilot it as a Salads-only pairing in **East Village** (75% scan rate) before a broader launch.`,
+    assistant: {
+      intro:
+        "Probably moderate fit, not a hero launch. Your ICP indexes high on citrus (81%) and carbonation (76%) — the sparkling base captures the carbonation, but mint/herbal notes aren't in your top taste signals.",
+      comparisons: [
+        { leftLabel: 'Citrus', leftPct: 79, rightLabel: 'Herbal', rightPct: 21 },
+        { leftLabel: 'Sparkling', leftPct: 76, rightLabel: 'Still', rightPct: 24 },
+      ],
+      whatsWorking: [
+        'Carbonation preference at 76% — the sparkling format is a tailwind.',
+        'Yuzu Mint already scores 0.88 affinity with Salads, a credible launch lane.',
+      ],
+      watchOuts: [
+        "Mint/herbal isn't in your top ICP signals; expect ~62–70% scan rate vs your 68% baseline.",
+        'Cold Brew Tonic is your case study for novel formats — it sits at 58% scan / 22% buy-again.',
+      ],
+      recommendation:
+        'Pilot it as a Salads-only pairing in East Village (75% scan rate) before a broader rollout.',
+    },
   },
   {
     id: 'starter-expand',
     title: 'Market expansion',
     user: 'Which neighborhood should we double down on for our next campaign?',
-    assistant: `Double down on **East Village**. It's already your strongest market — **264 deliveries, 75% scan rate, 4.8★** — and it sits well above your overall **68% scan rate**. Lower East Side (**71%, 4.7★**) is the natural second pick.
-
-Avoid Morningside Heights for now: **78 deliveries, 53% scan rate** — below the NiBL category average of 52%, so spend doesn't compound there yet.
-
-→ Recommended action: shift the next 100 samples to East Village Friday/Saturday dinner slots — your peak window is 7–9 PM and you'll convert at category-leading rates.`,
+    assistant: {
+      intro:
+        'Double down on East Village. It indexes well above your overall 68% scan rate, and Lower East Side is the natural second pick. Outside NY, California and Massachusetts are your strongest expansion bets.',
+      states: [
+        { code: 'NY', name: 'New York', score: 100 },
+        { code: 'CA', name: 'California', score: 89 },
+        { code: 'MA', name: 'Massachusetts', score: 85 },
+        { code: 'WA', name: 'Washington', score: 82 },
+        { code: 'IL', name: 'Illinois', score: 80 },
+      ],
+      statesCaption: 'Strong-fit states for expansion',
+      whatsWorking: [
+        'East Village: 264 deliveries, 75% scan rate, 4.8★ — best-ever performance.',
+        'Lower East Side: 187 deliveries, 71% scan, 4.7★ — consistent second.',
+      ],
+      watchOuts: [
+        'Morningside Heights at 53% scan and only 78 deliveries — keep spend lean there.',
+      ],
+      recommendation:
+        'Shift the next 100 samples to East Village Friday + Saturday dinner slots — 7-9 PM is your peak window.',
+    },
   },
   {
     id: 'starter-pairing',
     title: 'Food pairing strategy',
     user: 'What food category should we target for our yuzu ginger flavor?',
-    assistant: `**Spicy food, no question.** Yuzu Ginger scores **0.89 affinity** with spicy dishes — the highest single cell in your affinity matrix. Your ICP also indexes at **72% spice tolerance**, which is unusually high, so the audience is there.
-
-- Current Yuzu Ginger volume: only **121 pairings** (4th of 5 variants)
-- Underexposed: 0.89 affinity vs 0.65 average for the rest of your line
-- Closest fit cuisines: Sichuan, Thai, Korean
-
-→ Recommended action: pitch NiBL to pair Yuzu Ginger with spicy Asian orders specifically — the lift should beat your current **65% scan rate** within a week.`,
+    assistant: {
+      intro:
+        'Spicy food, no question. Yuzu Ginger scores 0.89 affinity with spicy dishes — the single highest cell in your affinity matrix — and your ICP indexes at 72% spice tolerance.',
+      comparisons: [
+        { leftLabel: 'Pasta', leftPct: 38, rightLabel: 'Salad', rightPct: 62 },
+        { leftLabel: 'Indian', leftPct: 41, rightLabel: 'Chinese', rightPct: 59 },
+      ],
+      whatsWorking: [
+        'Yuzu Ginger × Spicy = 0.89 affinity, your highest cell of any flavor × food.',
+        '72% spice tolerance is unusually high for a citrus-anchored ICP.',
+      ],
+      watchOuts: [
+        'Yuzu Ginger only has 121 pairings (4th of 5 variants) — it is underexposed.',
+        'Cold Brew Tonic shows what happens when a variant misses the ICP: 58% scan, 22% buy-again.',
+      ],
+      recommendation:
+        'Pitch NiBL to pair Yuzu Ginger with spicy Asian orders specifically — the lift should beat the current 65% scan rate within a week.',
+    },
   },
 ];
 
@@ -71,14 +119,12 @@ export function ChatInterface() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Auto-scroll on new messages / thinking.
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [messages, busy]);
 
   useEffect(() => {
-    // Auto-resize textarea (max 3 lines ≈ 96px).
     const ta = taRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
@@ -104,11 +150,15 @@ export function ChatInterface() {
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ message: trimmed, history: messages }),
         });
-        const data = (await res.json()) as { reply: string };
+        const data = (await res.json()) as {
+          reply: string;
+          structured?: ChatReplyStructured;
+        };
         const reply: ChatMessage = {
           id: makeId(),
           role: 'assistant',
           content: data.reply,
+          structured: data.structured,
           timestamp: isoNow(),
         };
         setMessages((prev) => [...prev, reply]);
@@ -131,7 +181,7 @@ export function ChatInterface() {
     [busy, messages],
   );
 
-  const loadStarter = useCallback((starter: (typeof STARTERS)[number]) => {
+  const loadStarter = useCallback((starter: Starter) => {
     const t = isoNow();
     setMessages((prev) => [
       ...prev,
@@ -139,7 +189,8 @@ export function ChatInterface() {
       {
         id: makeId(),
         role: 'assistant',
-        content: starter.assistant,
+        content: starter.assistant.intro, // fallback text if structured ever fails to render
+        structured: starter.assistant,
         timestamp: t,
       },
     ]);
@@ -162,7 +213,6 @@ export function ChatInterface() {
 
   return (
     <div className="flex h-[calc(100vh-12rem)] min-h-[520px] flex-col overflow-hidden rounded-lg border border-foreground bg-card shadow-flat">
-      {/* Header */}
       <div className="border-b border-border px-5 py-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
@@ -178,7 +228,6 @@ export function ChatInterface() {
         </div>
       </div>
 
-      {/* Scrollable conversation */}
       <div
         ref={scrollRef}
         className="flex-1 space-y-4 overflow-y-auto bg-muted/40 px-4 py-5 sm:px-6"
@@ -203,7 +252,6 @@ export function ChatInterface() {
         {busy ? <ThinkingBubble /> : null}
       </div>
 
-      {/* Sticky composer */}
       <form
         onSubmit={onSubmit}
         className="space-y-2 border-t border-border bg-card px-4 py-3 sm:px-6"
@@ -251,7 +299,7 @@ function StarterAccordion({
 }: {
   open: boolean;
   onToggle: () => void;
-  onPick: (s: (typeof STARTERS)[number]) => void;
+  onPick: (s: Starter) => void;
 }) {
   return (
     <div className="nibl-card overflow-hidden">

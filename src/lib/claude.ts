@@ -5,6 +5,7 @@ import { serverEnv } from './env';
 import { CHAT_SYSTEM_PROMPT, PREDICT_SYSTEM_PROMPT } from './intelligence/prompts';
 import type {
   ChatMessage,
+  ChatReplyStructured,
   ProductPrediction,
 } from './intelligence/types';
 
@@ -99,10 +100,59 @@ export async function generateCampaignReport(): Promise<string> {
   return extractText(msg);
 }
 
+export type ChatGenerationResult = {
+  text: string;                          // plain-text linearization (also used for clipboard / fallback)
+  structured?: ChatReplyStructured;      // present when Claude's JSON parsed OK
+};
+
+function structuredToText(r: ChatReplyStructured): string {
+  const parts: string[] = [r.intro];
+  if (r.comparisons?.length) {
+    parts.push(
+      r.comparisons
+        .map((c) => `${c.leftLabel} ${c.leftPct}% vs ${c.rightLabel} ${c.rightPct}%`)
+        .join('\n'),
+    );
+  }
+  if (r.states?.length) {
+    parts.push(
+      `${r.statesCaption ?? 'Top fit states'}: ` +
+        r.states.map((s) => `${s.code} ${s.score}%`).join(' · '),
+    );
+  }
+  if (r.whatsWorking?.length) {
+    parts.push(
+      "What's working:\n" + r.whatsWorking.map((b) => `• ${b}`).join('\n'),
+    );
+  }
+  if (r.watchOuts?.length) {
+    parts.push(
+      'Watch-outs:\n' + r.watchOuts.map((b) => `• ${b}`).join('\n'),
+    );
+  }
+  parts.push(`→ Recommended action: ${r.recommendation}`);
+  return parts.join('\n\n');
+}
+
+function tryParseStructured(raw: string): ChatReplyStructured | undefined {
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start < 0 || end < 0) return undefined;
+  try {
+    const obj = JSON.parse(raw.slice(start, end + 1)) as Partial<ChatReplyStructured>;
+    if (typeof obj.intro !== 'string' || typeof obj.recommendation !== 'string') {
+      return undefined;
+    }
+    return obj as ChatReplyStructured;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function generateIntelligenceChat(
   userMessage: string,
   history: ChatMessage[],
-): Promise<string> {
+): Promise<ChatGenerationResult> {
   const client = getClient();
   const trimmed = history.slice(-6).map((m) => ({
     role: m.role,
@@ -110,11 +160,16 @@ export async function generateIntelligenceChat(
   }));
   const msg = await client.messages.create({
     model: MODEL,
-    max_tokens: 600,
+    max_tokens: 700,
     system: CHAT_SYSTEM_PROMPT,
     messages: [...trimmed, { role: 'user', content: userMessage }],
   });
-  return extractText(msg);
+  const raw = extractText(msg);
+  const structured = tryParseStructured(raw);
+  if (structured) {
+    return { text: structuredToText(structured), structured };
+  }
+  return { text: raw };
 }
 
 export async function generateProductPrediction(

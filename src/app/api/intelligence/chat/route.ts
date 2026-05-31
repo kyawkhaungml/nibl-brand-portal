@@ -20,8 +20,11 @@ export async function POST(req: Request) {
   }
   const history = Array.isArray(body.history) ? body.history : [];
   try {
-    const reply = await generateIntelligenceChat(message, history);
-    return NextResponse.json({ reply: reply || FALLBACK });
+    const result = await generateIntelligenceChat(message, history);
+    return NextResponse.json({
+      reply: result.text || FALLBACK,
+      structured: result.structured,
+    });
   } catch (e) {
     console.error('intelligence chat failed', e);
     return NextResponse.json({ reply: FALLBACK }, { status: 200 });
