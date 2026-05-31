@@ -28,16 +28,18 @@ Return ONLY a JSON object (no markdown, no code fences, no preamble) of the shap
 
 Section rules:
 - intro and recommendation are ALWAYS present.
-- comparisons: pick 1-3 when the question implies a choice or direction. Use this vocabulary when it fits, picking realistic splits:
-  · Sparkling 76% vs Still 24%
-  · Citrus 79% vs Floral/Herbal 21%
-  · Lightly sweet 68% vs Bold sweet 32%
-  · With food 72% vs Standalone 28%
-  · Coffee 42% vs Matcha 58%
-  · Pasta 38% vs Salad 62%
-  · Indian 41% vs Chinese 59%
+- comparisons: pick 1-3 when the question implies a choice or direction. leftPct and rightPct are each 0-100 fit scores for the left/right option — they do NOT need to sum to 100. Use this vocabulary when it fits:
+  · Sparkling 76% vs Still 24% (binary preference — sums to 100)
+  · Citrus 79% vs Floral/Herbal 21% (binary preference)
+  · Lightly sweet 68% vs Bold sweet 32% (binary preference)
+  · With food 72% vs Standalone 28% (binary preference)
+  · Coffee 42% vs Matcha 58% (binary preference)
+  · Pasta 38% vs Salad 62% (binary preference)
+  · Indian 41% vs Chinese 59% (binary preference)
   · Dinner peak 49% vs Lunch peak 31%
-  You can also invent new A/B splits relevant to the question, anchored in the brand data.
+  · Spicy food pairing fit 78% / American comfort pairing fit 52% (two independent fit scores)
+  · Yuzu × Sushi 91% / Yuzu × Mexican 62% (two independent affinity scores)
+  You can also invent new comparisons relevant to the question, anchored in the brand data. Use independent fit scores whenever the two options aren't mutually exclusive.
 - states: include ONLY when the question is about expansion, geography, where to launch, or which market to target. Use 2-letter codes. Score is 0-100 (ICP match or fit). Pick 3-6 states. Add a short statesCaption like "Top expansion candidates" or "Where your ICP shows up strongest".
 - whatsWorking: include 1-3 short bullets citing specific numbers when surfacing what to keep doing.
 - watchOuts: include 1-3 short bullets when there are real risks (low scan, weak ICP fit, underperforming variant). Each bullet is one sentence with a specific number.

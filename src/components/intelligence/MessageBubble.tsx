@@ -7,7 +7,21 @@ import { InsightCallout } from './InsightCallout';
 import type {
   ChatMessage,
   ChatReplyStructured,
+  StateScore,
 } from '@/lib/intelligence/types';
+
+// Demo placeholder shown when a structured reply doesn't include `states`.
+// Matches the top fit states in kaceMockData.geoBreakdown so the map reads
+// consistent with the rest of the portal.
+const DEFAULT_PLACEHOLDER_STATES: StateScore[] = [
+  { code: 'NY', name: 'New York',      score: 100 },
+  { code: 'CA', name: 'California',    score:  89 },
+  { code: 'MA', name: 'Massachusetts', score:  85 },
+  { code: 'WA', name: 'Washington',    score:  82 },
+  { code: 'IL', name: 'Illinois',      score:  80 },
+  { code: 'CO', name: 'Colorado',      score:  79 },
+  { code: 'OR', name: 'Oregon',        score:  76 },
+];
 
 function fmtTime(iso: string): string {
   try {
@@ -113,14 +127,19 @@ function renderStructured(r: ChatReplyStructured): React.ReactNode {
         </div>
       ) : null}
 
-      {r.states && r.states.length > 0 ? (
-        <div className="space-y-2">
-          <SectionLabel>
-            {r.statesCaption ?? 'Where your ICP shows up'}
-          </SectionLabel>
-          <MiniStateMap states={r.states} caption={r.statesCaption} />
-        </div>
-      ) : null}
+      {(() => {
+        const hasStates = !!(r.states && r.states.length > 0);
+        const statesToShow = hasStates ? r.states! : DEFAULT_PLACEHOLDER_STATES;
+        const caption = hasStates
+          ? (r.statesCaption ?? 'Where your ICP shows up')
+          : 'Where your ICP shows up (placeholder)';
+        return (
+          <div className="space-y-2">
+            <SectionLabel>{caption}</SectionLabel>
+            <MiniStateMap states={statesToShow} caption={caption} />
+          </div>
+        );
+      })()}
 
       {r.whatsWorking && r.whatsWorking.length > 0 ? (
         <InsightCallout
