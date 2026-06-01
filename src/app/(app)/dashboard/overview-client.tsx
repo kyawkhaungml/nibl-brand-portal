@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, MapPin, Trophy } from 'lucide-react';
+import { Clock, ExternalLink, MapPin, Trophy } from 'lucide-react';
 import { AreaChart } from '@/components/charts/area-chart';
 import { BenchmarkRows } from '@/components/cards/benchmark-rows';
 import { BrandLeaderboard } from '@/components/cards/brand-leaderboard';
@@ -76,7 +76,16 @@ export function OverviewClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <a
+          href="https://nibl.food"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-1.5 text-xs text-foreground transition-colors hover:border-accent hover:text-accent"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          Browse NiBL
+        </a>
         <DownloadReportButton
           summary={summary}
           benchmark={benchmark}
