@@ -63,8 +63,8 @@ export function CreateCampaignModal({
   const [startDate, setStartDate] = useState(minDate);
   const [endDate, setEndDate] = useState('');
   const [ongoing, setOngoing] = useState(false);
-  const [samples, setSamples] = useState(500);
-  const [cost, setCost] = useState(2.5);
+  const [samples, setSamples] = useState<number | ''>(500);
+  const [cost, setCost] = useState<number | ''>(2.5);
   const [pickedHoods, setPickedHoods] = useState<string[]>([]);
   const [promoCode, setPromoCode] = useState('');
   const [promoTouched, setPromoTouched] = useState(false);
@@ -87,15 +87,17 @@ export function CreateCampaignModal({
     if (!promoTouched) setPromoCode(autoPromo(v));
   }
 
-  const totalSpend = samples * cost;
+  const samplesNum = samples === '' ? 0 : samples;
+  const costNum = cost === '' ? 0 : cost;
+  const totalSpend = samplesNum * costNum;
   const duration = ongoing || !endDate ? 0 : daysBetween(startDate, endDate);
 
   const valid =
     name.trim().length > 0 &&
     drinkName.trim().length > 0 &&
     pickedVariants.length > 0 &&
-    samples >= 100 &&
-    cost > 0 &&
+    samplesNum >= 100 &&
+    costNum > 0 &&
     !!startDate &&
     (ongoing || !!endDate);
 
@@ -128,8 +130,8 @@ export function CreateCampaignModal({
       startDate,
       endDate: ongoing ? null : endDate,
       status: 'pending',
-      totalBudget: samples,
-      costPerSample: cost,
+      totalBudget: samples === '' ? 0 : samples,
+      costPerSample: cost === '' ? 0 : cost,
       samplesUsed: 0,
       extras: {
         targetNeighborhoods: pickedHoods,
@@ -238,7 +240,10 @@ export function CreateCampaignModal({
               min={100}
               step={100}
               value={samples}
-              onChange={(e) => setSamples(Number(e.target.value))}
+              onChange={(e) => {
+                const v = e.target.value;
+                setSamples(v === '' ? '' : Number(v));
+              }}
               required
               className={inputCls}
             />
@@ -250,7 +255,10 @@ export function CreateCampaignModal({
               min={0.1}
               step={0.1}
               value={cost}
-              onChange={(e) => setCost(Number(e.target.value))}
+              onChange={(e) => {
+                const v = e.target.value;
+                setCost(v === '' ? '' : Number(v));
+              }}
               required
               className={inputCls}
             />
