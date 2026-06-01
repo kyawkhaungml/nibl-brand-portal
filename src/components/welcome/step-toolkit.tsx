@@ -24,7 +24,7 @@ const FEATURES: Feature[] = [
   {
     icon: Users,
     label: 'Audience',
-    body: 'The taste profile of customers drinking your product.',
+    body: 'The taste profile of customers trying your product.',
     delayMs: 1100,
   },
   {

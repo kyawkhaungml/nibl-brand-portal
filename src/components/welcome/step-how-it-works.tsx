@@ -14,7 +14,7 @@ const STEPS: Step[] = [
     num: 1,
     icon: Package,
     title: 'Your brand ships samples',
-    body: 'You send a batch of your drink to NiBL.',
+    body: 'You send a batch of your product to NiBL.',
     delayMs: 700,
   },
   {
