@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { useUserCampaigns } from '@/lib/use-user-campaigns';
 import { useBrand } from '@/components/brand/brand-context';
+import { kaceMockData } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
 import type { BrandCampaign } from '@/types';
 
@@ -17,14 +18,28 @@ const VARIANTS = [
   'Cold Brew Tonic',
 ];
 
-const NEIGHBORHOODS = [
-  'East Village',
-  'Lower East Side',
-  'Stuy Town',
-  'Peter Cooper Village',
-  'Morningside Heights',
-  'Gramercy',
-];
+const GEO_STATES = kaceMockData.geoBreakdown;
+
+const STATUS_ORDER: Record<string, number> = {
+  active: 0,
+  opportunity: 1,
+  'low-match': 2,
+};
+const SORTED_STATES = [...GEO_STATES].sort(
+  (a, b) =>
+    (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99),
+);
+
+function citiesForState(code: string): string[] {
+  const s = GEO_STATES.find((x) => x.code === code);
+  if (!s) return [];
+  if (s.code === 'NY') return [s.topCity];
+  return s.cities?.map((c) => c.name) ?? [];
+}
+
+const NYC_NEIGHBORHOODS = (
+  GEO_STATES.find((s) => s.code === 'NY')?.neighborhoods ?? []
+).map((n) => n.neighborhood);
 
 function tomorrowIso(): string {
   const d = new Date();
@@ -65,6 +80,8 @@ export function CreateCampaignModal({
   const [ongoing, setOngoing] = useState(false);
   const [samples, setSamples] = useState<number | ''>(500);
   const [cost, setCost] = useState<number | ''>(2.5);
+  const [pickedStates, setPickedStates] = useState<string[]>([]);
+  const [pickedCities, setPickedCities] = useState<string[]>([]);
   const [pickedHoods, setPickedHoods] = useState<string[]>([]);
   const [promoCode, setPromoCode] = useState('');
   const [promoTouched, setPromoTouched] = useState(false);
@@ -75,6 +92,26 @@ export function CreateCampaignModal({
     setPickedVariants((prev) =>
       prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v],
     );
+  }
+  function toggleState(code: string) {
+    setPickedStates((prev) => {
+      if (prev.includes(code)) {
+        const cities = citiesForState(code);
+        setPickedCities((p) => p.filter((c) => !cities.includes(c)));
+        if (code === 'NY') setPickedHoods([]);
+        return prev.filter((x) => x !== code);
+      }
+      return [...prev, code];
+    });
+  }
+  function toggleCity(name: string) {
+    setPickedCities((prev) => {
+      if (prev.includes(name)) {
+        if (name === 'New York City') setPickedHoods([]);
+        return prev.filter((x) => x !== name);
+      }
+      return [...prev, name];
+    });
   }
   function toggleHood(h: string) {
     setPickedHoods((prev) =>
@@ -110,6 +147,8 @@ export function CreateCampaignModal({
     setOngoing(false);
     setSamples(500);
     setCost(2.5);
+    setPickedStates([]);
+    setPickedCities([]);
     setPickedHoods([]);
     setPromoCode('');
     setPromoTouched(false);
@@ -134,6 +173,8 @@ export function CreateCampaignModal({
       costPerSample: cost === '' ? 0 : cost,
       samplesUsed: 0,
       extras: {
+        targetStates: pickedStates,
+        targetCities: pickedCities,
         targetNeighborhoods: pickedHoods,
         promoCode: promoCode.trim(),
         notes: notes.trim(),
@@ -265,19 +306,75 @@ export function CreateCampaignModal({
           </Field>
         </div>
 
-        <Field label="Target neighborhoods">
+        <Field label="Target states">
           <div className="mt-1 flex flex-wrap gap-2">
-            {NEIGHBORHOODS.map((h) => (
+            {SORTED_STATES.map((s) => (
               <Chip
-                key={h}
-                active={pickedHoods.includes(h)}
-                onClick={() => toggleHood(h)}
+                key={s.code}
+                active={pickedStates.includes(s.code)}
+                onClick={() => toggleState(s.code)}
               >
-                {h}
+                <span
+                  aria-hidden
+                  className={cn(
+                    'mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle',
+                    s.status === 'active' && 'bg-emerald-500',
+                    s.status === 'opportunity' && 'bg-amber-500',
+                    s.status === 'low-match' && 'bg-gray-400',
+                  )}
+                />
+                {s.code}
               </Chip>
             ))}
           </div>
         </Field>
+
+        {pickedStates.length > 0 ? (
+          <Field label="Target cities">
+            <div className="mt-1 space-y-2">
+              {pickedStates.map((code) => {
+                const state = GEO_STATES.find((s) => s.code === code);
+                const cities = citiesForState(code);
+                if (!state || cities.length === 0) return null;
+                return (
+                  <div key={code}>
+                    <div className="text-[11px] text-muted-foreground">
+                      {state.name}
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {cities.map((c) => (
+                        <Chip
+                          key={c}
+                          active={pickedCities.includes(c)}
+                          onClick={() => toggleCity(c)}
+                        >
+                          {c}
+                        </Chip>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Field>
+        ) : null}
+
+        {pickedCities.includes('New York City') &&
+        NYC_NEIGHBORHOODS.length > 0 ? (
+          <Field label="Target neighborhoods (NYC)">
+            <div className="mt-1 flex flex-wrap gap-2">
+              {NYC_NEIGHBORHOODS.map((h) => (
+                <Chip
+                  key={h}
+                  active={pickedHoods.includes(h)}
+                  onClick={() => toggleHood(h)}
+                >
+                  {h}
+                </Chip>
+              ))}
+            </div>
+          </Field>
+        ) : null}
 
         <Field label="Promo code" htmlFor="cc-promo">
           <input
@@ -325,11 +422,27 @@ export function CreateCampaignModal({
                 </span>
               </span>
             ) : null}
-            {pickedHoods.length > 0 ? (
+            {pickedStates.length + pickedCities.length + pickedHoods.length >
+            0 ? (
               <span>
                 Targeting{' '}
                 <span className="font-semibold text-foreground">
-                  {pickedHoods.length} neighborhoods
+                  {[
+                    pickedStates.length &&
+                      `${pickedStates.length} state${
+                        pickedStates.length === 1 ? '' : 's'
+                      }`,
+                    pickedCities.length &&
+                      `${pickedCities.length} ${
+                        pickedCities.length === 1 ? 'city' : 'cities'
+                      }`,
+                    pickedHoods.length &&
+                      `${pickedHoods.length} neighborhood${
+                        pickedHoods.length === 1 ? '' : 's'
+                      }`,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </span>
               </span>
             ) : null}

@@ -97,12 +97,33 @@ export function PendingCampaignView({ campaign }: { campaign: BrandCampaign }) {
           </div>
           <div className="nibl-card p-5">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              Target neighborhoods
+              Targeting
             </div>
-            <div className="mt-2 text-sm text-foreground">
-              {extras.targetNeighborhoods.length
-                ? extras.targetNeighborhoods.join(' · ')
-                : 'No targets selected'}
+            <div className="mt-2 space-y-1.5 text-sm text-foreground">
+              <div>
+                <span className="text-[11px] text-muted-foreground">
+                  States:
+                </span>{' '}
+                {(extras.targetStates ?? []).length
+                  ? (extras.targetStates ?? []).join(' · ')
+                  : '—'}
+              </div>
+              <div>
+                <span className="text-[11px] text-muted-foreground">
+                  Cities:
+                </span>{' '}
+                {(extras.targetCities ?? []).length
+                  ? (extras.targetCities ?? []).join(' · ')
+                  : '—'}
+              </div>
+              <div>
+                <span className="text-[11px] text-muted-foreground">
+                  Neighborhoods:
+                </span>{' '}
+                {extras.targetNeighborhoods.length
+                  ? extras.targetNeighborhoods.join(' · ')
+                  : '—'}
+              </div>
             </div>
           </div>
           <div className="nibl-card p-5">

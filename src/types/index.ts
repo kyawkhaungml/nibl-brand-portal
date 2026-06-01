@@ -50,6 +50,8 @@ export type StatePerformance = {
 export type CampaignStatus = 'active' | 'paused' | 'completed' | 'pending';
 
 export type UserCampaignExtras = {
+  targetStates: string[];
+  targetCities: string[];
   targetNeighborhoods: string[];
   promoCode: string;
   notes: string;
