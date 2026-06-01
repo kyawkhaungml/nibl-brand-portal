@@ -44,8 +44,29 @@ function notify() {
 
 const EMPTY: BrandCampaign[] = [];
 
+// Cache the parsed snapshot keyed off the raw localStorage string so
+// useSyncExternalStore receives a stable reference across renders. Without
+// this, every render parses JSON afresh and returns a new array, which
+// React treats as "state changed" → infinite re-render loop.
+let cachedRaw: string | null = '__unset__';
+let cachedSnapshot: BrandCampaign[] = EMPTY;
+
 function getSnapshot(): BrandCampaign[] {
-  return readFromStorage();
+  if (typeof window === 'undefined') return EMPTY;
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (raw === cachedRaw) return cachedSnapshot;
+  cachedRaw = raw;
+  if (!raw) {
+    cachedSnapshot = EMPTY;
+    return cachedSnapshot;
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    cachedSnapshot = Array.isArray(parsed) ? (parsed as BrandCampaign[]) : EMPTY;
+  } catch {
+    cachedSnapshot = EMPTY;
+  }
+  return cachedSnapshot;
 }
 function getServerSnapshot(): BrandCampaign[] {
   return EMPTY;
